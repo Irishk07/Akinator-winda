@@ -271,10 +271,8 @@ Tree_status TreeHTMLDump(Tree* tree, Tree_node* tree_node, int line, const char*
     snprintf(command, MAX_LEN_NAME, "dot %s/graphes/graph%d.txt -T png -o %s/images/image%d.png", 
                                      tree->dump_info.directory, tree->dump_info.num_dump, tree->dump_info.directory, tree->dump_info.num_dump);
     
-    fprintf(stderr, "start\n");
     if (system((const char*)command) != 0)
         TREE_CHECK_AND_RETURN_ERRORS(EXECUTION_FAILED,      fprintf(tree->dump_info.dump_file, "Error with create image:(\n"));
-    fprintf(stderr, "finish\n");
 
     fprintf(tree->dump_info.dump_file, "\n");
     fprintf(tree->dump_info.dump_file, "<img src = %s/images/image%d.png width = 700px>", tree->dump_info.directory, tree->dump_info.num_dump);
