@@ -1,0 +1,5 @@
+.vscode
+build/
+dump/
+tree_prog.exe*
+dump2.html
