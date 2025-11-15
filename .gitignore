@@ -5,3 +5,7 @@ tree_prog.exe*
 dump2.html
 new_tree.txt
 tree_file.txt
+image*/
+ffmpeg.exe
+video/
+animation/

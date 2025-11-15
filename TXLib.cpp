@@ -2,6 +2,7 @@
 #define TXLIB_H_
 
 #define TX_USE_SPEAK
+#define TX_USE_SFML
 #define TX_COMPILING
 #include "TXLib.h"
 
