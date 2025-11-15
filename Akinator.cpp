@@ -1,4 +1,5 @@
 #define TX_USE_SPEAK
+#define TX_COMPILED
 #include "TXLib.h"
 
 #include <assert.h>
@@ -36,7 +37,9 @@ Tree_status StartAkinator(Akinator* akinator) {
     TREE_CHECK_AND_RETURN_ERRORS(TreeVerify(&akinator->tree)); 
 
     color_printf(COLOR_PURPLE, " - Hello, friend!\n");
-    txSpeak("Hello, friend!");
+    txSpeak("<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='EN'>" 
+            "- Hello, friend!\n"
+            "</speak>");
 
     color_printf(COLOR_PURPLE, " - Are you ready to start game?\n");
     txSpeak("Are you ready to start game?");
@@ -206,6 +209,7 @@ void AskQuestion(Tree_node* cur_node) {
     assert(cur_node);
 
     color_printf(COLOR_GREEN, " - %s?\n", cur_node->info);
+    txSpeak("%s?", cur_node->info);
 }
 
 type_answer GiveAndCheckMyAnswer(Tree_node* cur_node) {

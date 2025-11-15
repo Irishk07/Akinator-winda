@@ -6,7 +6,7 @@ CPPFLAGS := -DDEBUG -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef 
 -Wlogical-op -Wno-missing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo \
 -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE
 
-CPPSRC := main.cpp tree.cpp Akinator.cpp stack.cpp check_errors.cpp string_functions.cpp onegin.cpp
+CPPSRC := main.cpp tree.cpp Akinator.cpp stack.cpp check_errors.cpp string_functions.cpp onegin.cpp TXLib.cpp
 
 CPPOBJ := $(CPPSRC:%.cpp=build/%.o) 
 
