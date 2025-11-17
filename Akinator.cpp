@@ -15,6 +15,22 @@
 #include "onegin.h"
 #include "tree.h"
 #include "stack.h"
+#include "string_functions.h"
+
+#define CONSOLE_POS                      \
+        txSetConsoleCursorPos(350, 250); 
+
+#define DEFAULT_SETTINGS_BEGIN(text_size)\
+        txSetFillColor(TX_BLACK);        \
+        txSetColor(TX_WHITE);            \
+        txSelectFont("Arial", text_size);\
+        CONSOLE_POS                      \
+        txTextCursor(true);              \
+        txClear();
+
+#define DEFAULT_SETTINGS_END \
+        txTextCursor(false); \
+        txClear();
 
 
 Tree_status AkinatorCtor(Akinator* akinator, const char *dump_filename, const char *directory) {
@@ -39,43 +55,48 @@ Tree_status StartAkinator(Akinator* akinator) {
     TREE_CHECK_AND_RETURN_ERRORS(TreeVerify(&akinator->tree)); 
 
     txCreateWindow(800, 600);
+    txTextCursor(false);
 
-    TXVideo(5, 1);
+    TXImage("downloads/akinator.bmp");
+
     txSpeak("<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='EN'>" 
-            "- Hello, friend!\n"
+            "                     Now.... Akinator\n"
             "</speak>");
 
+    txSpeak("\aHello friend!");
+    TXVideo(5, 1, 1500);
+
     txSpeak("\aAre you ready to start game?");
-    TXVideo(26, 2);
+    TXVideo(26, 2, 1500);
 
     while(true) {
         type_answer answer = GetAnswerYesNo();
 
         if (answer == YES) {
             txSpeak("\aLet's gooooooo");
-            TXVideo(7, 10);
+            TXVideo(7, 10, 1000);
 
             Tree_status status = ChooseOption(akinator);
             if (status == END_GAME) {
                 txSpeak("\aVery sad... Bye-bye");
-                TXVideo(100, 3);
+                TXVideo(100, 3, 2000);
                 break;
             }
             TREE_CHECK_AND_RETURN_ERRORS(status);
 
             txSpeak("\aSo, our game is over. Do you want to continue?");
-            TXVideo(26, 2);
+            TXVideo(26, 2, 2000);
         }
 
         else if (answer == NO) {
             txSpeak("\aVery sad... Bye-bye");
-            TXVideo(100, 3);
+            TXVideo(100, 3, 2000);
             break;
         }
 
         else if (answer == WRONG_ANSWER) {
             txSpeak("\aYou try to do it 5 times... What's wrong with you?");
-            TXVideo(100, 3);
+            TXVideo(100, 3, 2000);
             break;
         }
 
@@ -86,10 +107,16 @@ Tree_status StartAkinator(Akinator* akinator) {
     return SUCCESS;
 }
 
-void TXVideo(int cnt_shots, int number_video) {    
+void TXImage(const char* filename) {
+    HDC image = txLoadImage(filename);
+
+    txBitBlt(txDC(), 0, 0, 0, 0, image);
+}
+
+void TXVideo(int cnt_shots, int number_video, int sleep) {    
     for (int i = 0; i < cnt_shots; i++) {
         char filename[100];
-        snprintf(filename, 100, "images%d/image%d.bmp", number_video, i + 1);
+        snprintf(filename, 100, "downloads/images%d/image%d.bmp", number_video, i + 1);
 
         HDC image = txLoadImage(filename);
 
@@ -103,7 +130,7 @@ void TXVideo(int cnt_shots, int number_video) {
         txSleep(15);
     }
 
-    txSleep(2000);
+    txSleep(sleep);
 }
 
 type_answer GetAnswerYesNo() {
@@ -111,11 +138,13 @@ type_answer GetAnswerYesNo() {
 
     int cnt_attempts = CNT_ATTEMPTS;
 
+    DEFAULT_SETTINGS_BEGIN(80);
+
+
     while (cnt_attempts-- > 0 && result == WRONG_ANSWER) {
-        txClear();
-        txSetColor(TX_BLACK);
-        txSelectFont("Arial", 80);
-        txDrawText(100, 200, 700, 350, "Enter <Yes> or <No>");
+        CONSOLE_POS;
+        txDrawText(100, 150, 700, 500, "Enter <Yes> or <No>\n"
+                                        "_________________\n");
 
         char* answer = ReadAnswer();
 
@@ -128,11 +157,30 @@ type_answer GetAnswerYesNo() {
         }
 
         free(answer);
+
+        txClearConsole();
     }
 
-    txClear();
+    DEFAULT_SETTINGS_END;
 
     return result;
+}
+
+char* ReadAnswer() {
+    char* answer = NULL;
+    size_t size_buf = 0;
+
+    DEFAULT_SETTINGS_BEGIN(80);
+    txDrawText(100, 150, 700, 500, "Enter your answer\n"
+                                    "________________\n");
+
+    if (my_getline(&answer, &size_buf, stdin) == -1)
+        return NULL;
+
+    txClearConsole();
+    DEFAULT_SETTINGS_END;
+
+    return answer;
 }
 
 #define DO_CASE(action) \
@@ -142,9 +190,9 @@ type_answer GetAnswerYesNo() {
 Tree_status ChooseOption(Akinator* akinator) {
     TREE_CHECK_AND_RETURN_ERRORS(TreeVerify(&akinator->tree)); 
 
-    txClear();
-    txSetColor(TX_BLACK);
-    txSelectFont("Arial", 40);
+    DEFAULT_SETTINGS_BEGIN(40);
+    txTextCursor(false);
+
     txDrawText(100, 70, 700, 550, "Available options:\n\n" 
                                    "[1] Guess a character\n"
                                    "[2] Printf path to the character\n"
@@ -156,6 +204,9 @@ Tree_status ChooseOption(Akinator* akinator) {
                                    "Press any button\n");
     txSpeak("\aPlease, chose option");
     getchar();
+    txClearConsole();
+
+    DEFAULT_SETTINGS_END;
 
     type_options option = ReadSelectedOption();
 
@@ -181,12 +232,13 @@ type_options ReadSelectedOption() {
     type_options option = WRONG_OPTION;
     int cur_option = WRONG_ANSWER;
 
+    DEFAULT_SETTINGS_BEGIN(80);
+
     int cnt_attempts = CNT_ATTEMPTS;
     while (cnt_attempts-- > 0) {
-        txClear();
-        txSetColor(TX_BLACK);
-        txSelectFont("Arial", 70);
-        txDrawText(100, 200, 700, 350, "Enter 1, 2, 3, 4, 5 or 6");
+        CONSOLE_POS;
+        txDrawText(100, 150, 700, 500, "Enter 1, 2, 3, 4, 5 or 6\n"
+                                        "_________________\n");
 
         if (scanf("%d%*c", &cur_option) != 1) {
             scanf("%*[^\n]%*c");
@@ -194,8 +246,13 @@ type_options ReadSelectedOption() {
         option = (type_options)cur_option;
         
         if (option < WRONG_OPTION)
-            return option;
+            break;
+
+        txClearConsole();
     }
+
+    txClearConsole();
+    DEFAULT_SETTINGS_END;
 
     return option;
 }
@@ -224,13 +281,14 @@ Tree_status PlayAkinator(Akinator* akinator, Tree_node* cur_node) {
 
         if (answer == YES) {
             txSpeak("\aI guessed right!");
-            TXVideo(25, 4);
-            txSpeak("\aIt was a wonderful game!");
-            TXVideo(284, 5);
+            TXVideo(25, 4, 1000);
+            // txSpeak("\aIt was a wonderful game!");
+            txPlaySound ("downloads/fanfary.wav", SND_ASYNC);
+            TXVideo(284, 5, 0);
         }
         else {
             txSpeak("\aOh no");
-            TXVideo(41, 6);
+            TXVideo(41, 6, 0);
             TREE_CHECK_AND_RETURN_ERRORS(AskAndAddRightAnswer(akinator, cur_node));
         }
     }
@@ -247,17 +305,17 @@ void AskQuestion(Tree_node* cur_node) {
     assert(cur_node);
 
     txSpeak("\a%s?", cur_node->info);
-    TXVideo(36, 7);
+    TXVideo(36, 7, 1000);
 }
 
 type_answer GiveAndCheckMyAnswer(Tree_node* cur_node) {
     assert(cur_node);
 
     txSpeak("\aSo, my answer: %s\n", cur_node->info);
-    TXVideo(40, 8);
+    TXVideo(40, 8, 2000);
 
     txSpeak("\aIs it right?");
-    TXVideo(26, 2);
+    TXVideo(26, 2, 1500);
 
     return GetAnswerYesNo();
 }
@@ -267,7 +325,7 @@ Tree_status AskAndAddRightAnswer(Akinator* akinator, Tree_node* cur_node) {
     TREE_CHECK_AND_RETURN_ERRORS(TreeVerify(&akinator->tree)); 
 
     txSpeak("\aWhat is the right answer?");
-    TXVideo(139, 9);
+    TXVideo(139, 9, 2000);
 
     char* right_answer = ReadAnswer();
 
@@ -275,7 +333,7 @@ Tree_status AskAndAddRightAnswer(Akinator* akinator, Tree_node* cur_node) {
         TREE_CHECK_AND_RETURN_ERRORS(READ_ERROR);
 
     txSpeak("\aAsk, please, how is %s different from %s. It...?\n", right_answer, cur_node->info);
-    TXVideo(139, 9);
+    TXVideo(139, 9, 2000);
 
     char* difference = ReadAnswer();
 
@@ -286,7 +344,7 @@ Tree_status AskAndAddRightAnswer(Akinator* akinator, Tree_node* cur_node) {
                                                                                                             free(difference););
 
     txSpeak("\aThanks! It's very interesting. I remembered it");
-    TXVideo(26, 2);
+    TXVideo(26, 2, 2000);
 
     free(right_answer);
     free(difference);
@@ -300,18 +358,19 @@ Tree_status PathToCharacter(Akinator* akinator) {
     TREE_CHECK_AND_RETURN_ERRORS(TreeVerify(&akinator->tree));
 
     txSpeak("\aEnter name of the character");
-    TXVideo(26, 2);
+    TXVideo(26, 2, 2000);
 
     stack_t stack = {};
     char* character = NULL;
     TREE_CHECK_AND_RETURN_ERRORS(ReadAndDefinitionCharacter(akinator, &character, &stack));
 
-    txSpeak("Path to your character");
+    txSpeak("\aPath to your character");
+    TXVideo(26, 2, 1000);
 
     size_t cnt_connecting_words = sizeof(connecting_words) / sizeof(connecting_words[0]);
 
     txSpeak("\a%s", character);
-    TXVideo(40, 8);
+    TXVideo(40, 8, 0);
     
     Tree_node* cur_node = akinator->tree.root;
 
@@ -320,7 +379,7 @@ Tree_status PathToCharacter(Akinator* akinator) {
 
         PrintCurNode(&stack, i, cur_node);
 
-        TXVideo(40, 8);
+        TXVideo(40, 8, 0);
 
         txSpeak("%s", connecting_words[num_of_word]);
 
@@ -333,7 +392,7 @@ Tree_status PathToCharacter(Akinator* akinator) {
     else {
         txSpeak("\aNot %s", cur_node->info);
     }
-    TXVideo(40, 8);
+    TXVideo(40, 8, 0);
 
     TREE_STACK_CHECK_AND_RETURN_ERRORS(StackDtor(&stack));
 
@@ -407,19 +466,19 @@ Tree_status CompareTwoCharacters(Akinator* akinator) {
     TREE_CHECK_AND_RETURN_ERRORS(TreeVerify(&akinator->tree));
 
     txSpeak("\aEnter name of the first character");
-    TXVideo(26, 2);
+    TXVideo(26, 2, 2000);
     char* first_character = NULL;
     stack_t first_stack = {};
     TREE_CHECK_AND_RETURN_ERRORS(ReadAndDefinitionCharacter(akinator, &first_character, &first_stack));
 
     txSpeak("\aEnter name of the second character");
-    TXVideo(26, 2);
+    TXVideo(26, 2, 2000);
     char* second_character = NULL;
     stack_t second_stack = {};
     TREE_CHECK_AND_RETURN_ERRORS(ReadAndDefinitionCharacter(akinator, &second_character, &second_stack));
 
     txSpeak("\aNow you can listen to common signs of %s and %s", first_character, second_character);
-    TXVideo(40, 8);
+    TXVideo(40, 8, 2000);
 
     size_t both_size = MinSize_t(first_stack.size, second_stack.size);
     size_t cur_size = 0;
@@ -431,8 +490,7 @@ Tree_status CompareTwoCharacters(Akinator* akinator) {
         }
 
         PrintCurNode(&first_stack, cur_size, cur_node);
-
-        TXVideo(40, 8);
+        TXVideo(40, 8, 0);
 
         TREE_CHECK_AND_RETURN_ERRORS(MoveToNextNode(&first_stack, cur_size, &cur_node));
     }
@@ -442,19 +500,18 @@ Tree_status CompareTwoCharacters(Akinator* akinator) {
     Tree_node* cur_node_second = cur_node;
 
     txSpeak("\aNow you can listen to diffrent signs");
-    TXVideo(40, 8);
+    TXVideo(40, 8, 2000);
 
     txSpeak("\aFirst character %s has such signs", first_character);
-    TXVideo(40, 8);
+    TXVideo(40, 8, 2000);
     TREE_CHECK_AND_RETURN_ERRORS(PrintDifferentSigns(cur_node_first, &first_stack, cur_size));
 
     txSpeak("\aSecond character %s has such signs", second_character);
-    TXVideo(40, 8);
+    TXVideo(40, 8, 2000);
     TREE_CHECK_AND_RETURN_ERRORS(PrintDifferentSigns(cur_node_second, &second_stack, cur_size));
 
     TREE_STACK_CHECK_AND_RETURN_ERRORS(StackDtor(&first_stack));
     TREE_STACK_CHECK_AND_RETURN_ERRORS(StackDtor(&second_stack));
-
     free(first_character);
     free(second_character);
 
@@ -508,7 +565,7 @@ Tree_status PrintDifferentSigns(Tree_node* cur_node, stack_t* stack, size_t cur_
     for (size_t i = cur_size; i < stack->size - 1; ++i) {
         PrintCurNode(stack, i, cur_node);
 
-        TXVideo(40, 8);
+        TXVideo(40, 8, 0);
 
         TREE_CHECK_AND_RETURN_ERRORS(MoveToNextNode(stack, i, &cur_node));
     }
@@ -520,7 +577,7 @@ Tree_status PrintDifferentSigns(Tree_node* cur_node, stack_t* stack, size_t cur_
         txSpeak("\aNot %s", cur_node->info);
     }
 
-    TXVideo(40, 8);
+    TXVideo(40, 8, 0);
 
     return SUCCESS;
 }
@@ -529,20 +586,23 @@ Tree_status SaveTree(Akinator* akinator) {
     TREE_CHECK_AND_RETURN_ERRORS(TreeVerify(&akinator->tree)); 
 
     txSpeak("\aPlease, enter the name of the file where the tree will be saved");
-    TXVideo(26, 2);
+    TXVideo(26, 2, 500);
+    TXVideo(26, 2, 500);
+    TXVideo(26, 2, 1500);
 
     char* file_name = ReadAnswer();
 
     if (file_name == NULL) {
         txSpeak("\aSorry, I couldn't do it, I have some problems. Try later please");
-        TXVideo(100, 3);
+        TXVideo(100, 3, 2000);
     }
     else
         TREE_CHECK_AND_RETURN_ERRORS(CreateTreeFile(&akinator->tree, file_name));
 
     txSpeak("\aAll right, tree is saved in your file %s", file_name);
-    TXVideo(25, 4);
-    txSleep(1500);
+    TXVideo(25, 4, 500);
+    TXVideo(25, 4, 500);
+    TXVideo(25, 4, 1000);
 
     free(file_name);
 
@@ -555,20 +615,23 @@ Tree_status UploadTree(Akinator* akinator) {
     TREE_CHECK_AND_RETURN_ERRORS(TreeVerify(&akinator->tree)); 
 
     txSpeak("\aPlease, enter the name of the file from which the tree will be uploaded");
-    TXVideo(26, 2);
+    TXVideo(26, 2, 500);
+    TXVideo(26, 2, 500);
+    TXVideo(26, 2, 1500);
 
     char* file_name = ReadAnswer();
 
     if (file_name == NULL) {
         txSpeak("\aSorry, I couldn't do it, I have some problems. Try later please");
-        TXVideo(100, 3);
+        TXVideo(100, 3, 2000);
     }
     else
         TREE_CHECK_AND_RETURN_ERRORS(ReadTree(akinator, file_name));
 
     txSpeak("\aAll right, tree is uploaded from your file %s\n", file_name);
-    TXVideo(25, 4);
-    txSleep(1500);
+    TXVideo(25, 4, 500);
+    TXVideo(25, 4, 500);
+    TXVideo(25, 4, 1000);
 
     ON_DEBUG(TREE_CHECK_AND_RETURN_ERRORS(TreeHTMLDump(&akinator->tree, akinator->tree.root, DUMP_INFO, NOT_ERROR_DUMP)));
 

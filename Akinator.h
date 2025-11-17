@@ -36,7 +36,9 @@ enum type_path {
 const char* const connecting_words[] = {"so", "more than that", "also", "in addition", "besides"};
 
 
-void TXVideo(int cnt_shots, int number_video);
+void TXVideo(int cnt_shots, int number_video, int sleep);
+
+void TXImage(const char* filename);
 
 
 Tree_status AkinatorCtor(Akinator* akinator, const char *dump_filename, const char *directory);
@@ -44,6 +46,8 @@ Tree_status AkinatorCtor(Akinator* akinator, const char *dump_filename, const ch
 Tree_status StartAkinator(Akinator* akinator);
 
 type_answer GetAnswerYesNo();
+
+char* ReadAnswer();
 
 Tree_status ChooseOption(Akinator* akinator);
 

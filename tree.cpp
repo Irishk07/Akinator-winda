@@ -162,16 +162,6 @@ Tree_status InsertTwoLeaves(Tree* tree, Tree_node** node, const_type_t answer, c
     return SUCCESS;
 }
 
-char* ReadAnswer() {
-    char* answer = NULL;
-    size_t size_buf = 0;
-
-    if (my_getline(&answer, &size_buf, stdin) == -1)
-        return NULL;
-
-    return answer;
-}
-
 Tree_status CreateTreeFile(Tree* tree, const char* name_file_with_tree) {
     assert(name_file_with_tree);
     TREE_CHECK_AND_RETURN_ERRORS(TreeVerify(tree));

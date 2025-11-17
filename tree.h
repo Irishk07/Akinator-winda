@@ -47,8 +47,6 @@ size_t TreeSize(Tree_node* tree_node);
 
 Tree_status InsertTwoLeaves(Tree* tree, Tree_node** node, const_type_t answer, const_type_t question);
 
-char* ReadAnswer();
-
 Tree_status CreateTreeFile(Tree* tree, const char* name_file_with_tree);
 
 void PrintTreeToFile(Tree_node* tree_node, FILE* stream);
