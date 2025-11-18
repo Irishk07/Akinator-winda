@@ -77,7 +77,10 @@ void PrintCurNode(stack_t* stack, size_t index, Tree_node* cur_node);
 
 Tree_status MoveToNextNode(stack_t* stack, size_t index, Tree_node** cur_node);
 
-Tree_status PrintDifferentSigns(Tree_node* cur_node, stack_t* stack, size_t cur_size);
+Tree_status PrintDifferentSigns(const char* first_character, const char* second_character, 
+                                stack_t* first_stack, stack_t* second_stack, Tree_node* cur_node, size_t cur_size);
+
+Tree_status PrintDifferentSignsOneCharacter(Tree_node* cur_node, stack_t* stack, size_t cur_size);
 
 Tree_status SaveTree(Akinator* akinator);
 

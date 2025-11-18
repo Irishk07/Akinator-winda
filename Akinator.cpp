@@ -140,7 +140,6 @@ type_answer GetAnswerYesNo() {
 
     DEFAULT_SETTINGS_BEGIN(80);
 
-
     while (cnt_attempts-- > 0 && result == WRONG_ANSWER) {
         CONSOLE_POS;
         txDrawText(100, 150, 700, 500, "Enter <Yes> or <No>\n"
@@ -307,6 +306,8 @@ void AskQuestion(Tree_node* cur_node) {
     txSpeak("\a%s?", cur_node->info);
     TXVideo(36, 7, 1000);
 }
+
+// TxInputBox
 
 type_answer GiveAndCheckMyAnswer(Tree_node* cur_node) {
     assert(cur_node);
@@ -482,7 +483,6 @@ Tree_status CompareTwoCharacters(Akinator* akinator) {
 
     size_t both_size = MinSize_t(first_stack.size, second_stack.size);
     size_t cur_size = 0;
-
     Tree_node* cur_node = akinator->tree.root;
     for (; cur_size < both_size; ++cur_size) {
         if (first_stack.data[cur_size] != second_stack.data[cur_size]) {
@@ -496,19 +496,7 @@ Tree_status CompareTwoCharacters(Akinator* akinator) {
     }
     printf("\n");
 
-    Tree_node* cur_node_first = cur_node;
-    Tree_node* cur_node_second = cur_node;
-
-    txSpeak("\aNow you can listen to diffrent signs");
-    TXVideo(40, 8, 2000);
-
-    txSpeak("\aFirst character %s has such signs", first_character);
-    TXVideo(40, 8, 2000);
-    TREE_CHECK_AND_RETURN_ERRORS(PrintDifferentSigns(cur_node_first, &first_stack, cur_size));
-
-    txSpeak("\aSecond character %s has such signs", second_character);
-    TXVideo(40, 8, 2000);
-    TREE_CHECK_AND_RETURN_ERRORS(PrintDifferentSigns(cur_node_second, &second_stack, cur_size));
+    PrintDifferentSigns(first_character, second_character, &first_stack, &second_stack, cur_node, cur_size);
 
     TREE_STACK_CHECK_AND_RETURN_ERRORS(StackDtor(&first_stack));
     TREE_STACK_CHECK_AND_RETURN_ERRORS(StackDtor(&second_stack));
@@ -558,7 +546,28 @@ Tree_status MoveToNextNode(stack_t* stack, size_t index, Tree_node** cur_node) {
     return SUCCESS;
 }
 
-Tree_status PrintDifferentSigns(Tree_node* cur_node, stack_t* stack, size_t cur_size) {
+Tree_status PrintDifferentSigns(const char* first_character, const char* second_character, 
+                                stack_t* first_stack, stack_t* second_stack,
+                                Tree_node* cur_node, size_t cur_size) {
+
+    txSpeak("\aNow you can listen to diffrent signs");
+    TXVideo(40, 8, 2000);
+
+    Tree_node* cur_node_first = cur_node;
+    Tree_node* cur_node_second = cur_node;
+
+    txSpeak("\aFirst character %s has such signs", first_character);
+    TXVideo(40, 8, 2000);
+    TREE_CHECK_AND_RETURN_ERRORS(PrintDifferentSignsOneCharacter(cur_node_first, first_stack, cur_size));
+
+    txSpeak("\aSecond character %s has such signs", second_character);
+    TXVideo(40, 8, 2000);
+    TREE_CHECK_AND_RETURN_ERRORS(PrintDifferentSignsOneCharacter(cur_node_second, second_stack, cur_size));
+
+    return SUCCESS;
+}
+
+Tree_status PrintDifferentSignsOneCharacter(Tree_node* cur_node, stack_t* stack, size_t cur_size) {
     assert(cur_node);
     assert(stack);
 
